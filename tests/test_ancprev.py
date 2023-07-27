@@ -2,6 +2,8 @@ import numpy as np
 import unittest
 import percussion.ancprev as ancprev
 
+# run from percussion toplevel folder: python -m tests.test_ancprev
+
 class Test_TestANCPrev(unittest.TestCase):
     def test_ancprev_site_lnlhood(self):
         model_prev = np.array([0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00111, 0.00123, 0.00136, 0.00150, 0.00166,

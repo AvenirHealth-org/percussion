@@ -3,15 +3,7 @@ import pandas as pd
 import scipy.integrate as integrate
 import scipy.stats as stats
 
-## TODO: The ANC likelihood implementation is based on Jeff Eaton's anclik package,
-## which converts data stored in matrices to lists of arrays, then operates on those
-## lists. As a result, the current implementation converts from long dataframes to
-## matrices, then matrices to lists of arrays. It would probably be more efficient
-## to convert directly from long dataframes to lists of arrays.
-
 ## TODO: write_csv
-## TODO: set up unit test with Botswana urban ANC-SS data
-## TODO: streamline read_csv and __prepare_anc_data to eliminate the conversion from dataframe to matrices
 ## TODO: add methods to get and set ANC-SS and ANC-RT bias and variance inflation parameters
 ## TODO: accept ANC-RT site-level data
 ## TODO: accept ANC-RT census-level data
@@ -41,49 +33,31 @@ class ancprev:
 
         Suppose A is an instance of ancprev. After calling A.read_csv(...), several
         member variables of A are populated:
-        A.years -- array of years spanning the earliest to latest ANC prevalence datapoints. This may include some years without surveillance.
-        A.sites -- array of site names.
-        A.prev -- sites-by-years matrix of prevalence estimates, -1 if missing.
-        A.size -- sites-by-years matrix of sample sizes (N sampled for sentinel surveillance, N ascertained for routine testing), -1 if missing.
-        A.used -- sites-by-years matrix of indicator variables. Datapoints are included in likelihood evaluation if True and excluded otherwise.
+        A.anc_data -- unmodified data from CSV file
+        A.prev -- list of prevalence estimates by site
+        A.size -- list of sample sizes by site (numbers sampled in sentinel surveillance or ascertained in routine testing)
+        A.yidx -- list of year indices for obdservations, shifted so that A.base_year has index 0
         A.W -- posterior ANC prevalence estimates on probit scale, subject to a Beta(0.5, 0.5) prior
         A.v -- approximate variance in ANC prevalence estimates
-        A.i -- time index of observations relative to self.base_year (e.g., if A.base_year = 1970, i=21 for an observation in 1990)
 
-        The notation W and v is from Alkema et al (doi:10.1214/07-aoas111). W, v, and i are lists of arrays. These lists have one element
-        for each site that has some non-excluded (A.used=True) datapoints. The arrays correspond to the non-excluded datapoints for that
-        site.
+        The notation W and v is from Alkema et al (doi:10.1214/07-aoas111). prev, size, yidx, W, and v are lists of numpy arrays,
+        with array per site. Arrays elements correspond to non-excluded (records marked UseDataInFit=True) datapoint for that site.
         """
-        anc_data = pd.read_csv(csv_name)
+        self.anc_data = pd.read_csv(csv_name)
+        anc_data_used = self.anc_data[self.anc_data['UseDataInFit']] # drop unused observations
 
-        self.years = np.array(range(anc_data.Year.min(), anc_data.Year.max() + 1))
-        self.sites = anc_data.Site.unique()
+        # split anc_data_used into a list with one dataframe per site. sort=False preserves the site ordering
+        # in the input CSV. Note that reordering sites in the input file can change the calculated likelihood
+        # due to loss of precision in the likelihood calculations (that is, changing sort=False to sort=True)
+        # is enough to fail unit tests based on a ground-truth likelihood value).
+        site_list = [site for _, site in anc_data_used.groupby('Site', sort=False)]
 
-        ns = len(self.sites)
-        ny = len(self.years)
-        prev = np.full((ns, ny), fill_value=-1,    dtype = self.type_prev)
-        size = np.full((ns, ny), fill_value=-1,    dtype = self.type_size)
-        used = np.full((ns, ny), fill_value=False, dtype = self.type_used)
+        # split anc_data_used by site, then extract prev, size, and year indices relative to self.base_year
+        self.prev = [df['Prevalence'].to_numpy() for df in site_list]
+        self.size = [df['N'].to_numpy() for df in site_list]
+        self.yidx = [df['Year'].to_numpy() - self.base_year for df in site_list]
 
-        # long-to-wide transform
-        prev_wide = anc_data.pivot_table(index="Site", columns="Year", values="Prevalence",   fill_value=-1)
-        size_wide = anc_data.pivot_table(index="Site", columns="Year", values="N",            fill_value=-1)
-        used_wide = anc_data.pivot_table(index="Site", columns="Year", values="UseDataInFit", fill_value=False)
-
-        # map from rows and columns of prev_wide (some years missing, site ordering may differ) to prev (all years needed)
-        sidx = [prev_wide.index.get_loc(name) for name in self.sites]
-        yidx = [np.argwhere(self.years==year)[0][0] for year in prev_wide.columns]
-
-        # Fill in the full arrays for the years with data. Sites may still be out-of-order
-        prev[:,yidx] = prev_wide.to_numpy(dtype = self.type_prev)
-        size[:,yidx] = size_wide.to_numpy(dtype = self.type_size)
-        used[:,yidx] = used_wide.to_numpy(dtype = self.type_used)
-
-        self.prev = prev[sidx,:]
-        self.size = size[sidx,:]
-        self.used = used[sidx,:]
-
-        self.W, self.v, self.i = self.__prepare_anc_data()
+        self.W, self.v = self.__prepare_anc_data()
 
     def write_csv(self):
         pass
@@ -91,49 +65,18 @@ class ancprev:
     def likelihood(self, prevalence):
         """ Calculate the ANC log-likelihood given a time series of pregnant women HIV prevalence estimates """
         probit_prev = stats.norm.ppf(prevalence) + self.ancss_bias
-        dlst = [w - probit_prev[i] for (w, i) in zip(self.W, self.i)]
+        dlst = [w - probit_prev[i] for (w, i) in zip(self.W, self.yidx)]
         vlst = [v + self.ancss_var_inflation for v in self.v]
         return self.__anc_resid_likelihood(dlst, vlst)
 
     def __prepare_anc_data(self):
         """ Reformat ANC data for likelihood calculation """
-
-        ns = len(self.sites)
-        nt = len(self.years)
-
-        # We may mutate some prevalence and sample size entries, so we create copies here.
-        prev = self.prev.copy()
-        size = self.size.copy()
-
-        # drop observations that are not used
-        prev[np.logical_not(self.used)] = -1
-        size[np.logical_not(self.used)] = -1
-
-        # drop observations that are missing a prevalence or a sample size
-        prev[size<0] = -1
-        size[prev<0] = -1
-
-        # Drop sites that have no data used
-        site_used = (size >= 0).any((1))
-        prev_used = prev[site_used,:]
-        size_used = size[site_used,:]
-        nu = sum(site_used)
-
-        # get a list with one element per site that consists of an array of indices of non-missing observations for that site
-        indlist = [np.argwhere(prev_used[i,:] > 0) for i in range(nu)] 
-
-        # extract the non-missing observations. np.concatenate converts from an nx1 matrix to a 1-d array
-        prev_list = [np.concatenate(prev_used[i,indlist[i]]) for i in range(nu)]
-        size_list = [np.concatenate(size_used[i,indlist[i]]) for i in range(nu)]
-        year_list = [np.concatenate(self.years[indlist[i]] - self.base_year) for i in range(nu)] # convert from years to indices into the model prevalence estimates
-
         # apply data transforms used in likelihood calculation. The terms (x, W, v) follow variable naming
         # conventions in doi:10.1214/07-aoas111
-        x_list = [(p * n + 0.5) / (n + 1.0) for (p, n) in zip(prev_list, size_list)] # posterior prevalence given ANC data and Jeffreys prior
+        x_list = [(p * n + 0.5) / (n + 1.0) for (p, n) in zip(self.prev, self.size)] # posterior prevalence given ANC data and Jeffreys prior
         W_list = [stats.norm.ppf(x) for x in x_list]                                 # probit-transformed posterior prevalence
-        v_list = [2 * np.pi * np.exp(W * W) * x * (1.0 - x) / n for (W, x, n) in zip(W_list, x_list, size_list)] # approximate variance
-
-        return W_list, v_list, year_list
+        v_list = [2 * np.pi * np.exp(W * W) * x * (1.0 - x) / n for (W, x, n) in zip(W_list, x_list, self.size)] # approximate variance
+        return W_list, v_list
 
     def __anc_integrand(self, s2, dlst, Vlst):
         return np.exp(sum([stats.multivariate_normal.logpdf(d, cov = v + s2) for (d, v) in zip(dlst, Vlst)])) * s2**(-self.invgamma_shape - 1.0) * np.exp(-1.0 / (s2 * self.invgamma_rate))
