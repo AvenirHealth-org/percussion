@@ -89,7 +89,10 @@ class ancprev:
         return W_list, v_list
 
     def __anc_integrand(self, s2, dlst, Vlst):
-        return np.exp(sum([stats.multivariate_normal.logpdf(d, cov = v + s2) for (d, v) in zip(dlst, Vlst)])) * s2**(-self.invgamma_shape - 1.0) * np.exp(-1.0 / (s2 * self.invgamma_rate))
+        term1 = sum([stats.multivariate_normal.logpdf(d, cov = v + s2) for (d, v) in zip(dlst, Vlst)])
+        term2 = np.log(s2) * (-self.invgamma_shape - 1.0)
+        term3 = -1.0 / (s2 * self.invgamma_rate)
+        return np.exp(term1 + term2 + term3)
 
     def __anc_resid_likelihood(self, dlst, vlst):
         Vlst = [np.diag(v) for v in vlst]
