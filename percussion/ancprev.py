@@ -7,8 +7,11 @@ import scipy.stats as stats
 ## TODO: add methods to get and set ANC-SS and ANC-RT bias and variance inflation parameters
 ## TODO: accept ANC-RT site-level data
 ## TODO: accept ANC-RT census-level data
-## TODO: error handling for malformatted csv files
 ## TODO: more indicative variable names than "W", "V", etc.
+## TODO: use Region column to distinguish sites with the same name in different regions
+
+## TODO: error handling for malformatted csv files
+## - Type must be either RT or SS
 
 class ancprev:
     def __init__(self):
@@ -21,11 +24,13 @@ class ancprev:
         self.invgamma_shape = 0.58
         self.invgamma_rate  = 93.0
 
-        self.ancss_bias = 0.2637549
-        self.ancss_var_inflation = 0.0
-
         self.quad_lower = 1e-15
         self.quad_upper = 0.3
+
+        # Likelihood model parameters
+        self.__ancss_bias = 0.2637549
+        self.__ancrt_bias = 0.0         # ANC-RT site calibration parameter (see Sheng 2017 AIDS, doi:10.1097/QAD.0000000000001428)
+        self.__site_var_inflation = 0.0 # ANC site variance inflation (see Eaton 2017 AIDS, doi:10.1097/QAD.0000000000001419)
 
     def read_csv(self, csv_name):
         """ Read ANC prevalence data from a CSV file
@@ -36,15 +41,19 @@ class ancprev:
         A.anc_data -- unmodified data from CSV file
         A.prev -- list of prevalence estimates by site
         A.size -- list of sample sizes by site (numbers sampled in sentinel surveillance or ascertained in routine testing)
-        A.yidx -- list of year indices for obdservations, shifted so that A.base_year has index 0
+        A.yidx -- list of year indices for observations, shifted so that A.base_year has index 0
+        A.type -- list of indicators, 1 for observations from routine testing, 0 for sentinel surveillance
         A.W -- posterior ANC prevalence estimates on probit scale, subject to a Beta(0.5, 0.5) prior
         A.v -- approximate variance in ANC prevalence estimates
 
-        The notation W and v is from Alkema et al (doi:10.1214/07-aoas111). prev, size, yidx, W, and v are lists of numpy arrays,
-        with array per site. Arrays elements correspond to non-excluded (records marked UseDataInFit=True) datapoint for that site.
+        The notation W and v is from Alkema et al (doi:10.1214/07-aoas111). prev,
+        size, yidx, type, W, and v are lists of numpy arrays, with one array per
+        site. Each array element corresponds to a non-excluded datapoint
+        (datapoints marked UseDataInFit=True) for that site.
         """
         self.anc_data = pd.read_csv(csv_name)
         anc_data_used = self.anc_data[self.anc_data['UseDataInFit']] # drop unused observations
+        anc_data_used['Type'] = (anc_data_used['Type'] == "RT").astype(int) # 1 if routine testing, 0 otherwise (presumed sentinel surveillance)
 
         # split anc_data_used into a list with one dataframe per site. sort=False preserves the site ordering
         # in the input CSV. Note that reordering sites in the input file can change the calculated likelihood
@@ -56,6 +65,7 @@ class ancprev:
         self.prev = [df['Prevalence'].to_numpy() for df in site_list]
         self.size = [df['N'].to_numpy() for df in site_list]
         self.yidx = [df['Year'].to_numpy() - self.base_year for df in site_list]
+        self.type = [df['Type'].to_numpy() for df in site_list]
 
         self.W, self.v = self.__prepare_anc_data()
 
@@ -64,9 +74,9 @@ class ancprev:
 
     def likelihood(self, prevalence):
         """ Calculate the ANC log-likelihood given a time series of pregnant women HIV prevalence estimates """
-        probit_prev = stats.norm.ppf(prevalence) + self.ancss_bias
-        dlst = [w - probit_prev[i] for (w, i) in zip(self.W, self.yidx)]
-        vlst = [v + self.ancss_var_inflation for v in self.v]
+        probit_prev = stats.norm.ppf(prevalence) + self.__ancss_bias
+        dlst = [w - probit_prev[i] - r * self.__ancrt_bias for (w, i, r) in zip(self.W, self.yidx, self.type)]
+        vlst = [v + self.__site_var_inflation for v in self.v]
         return self.__anc_resid_likelihood(dlst, vlst)
 
     def __prepare_anc_data(self):
@@ -83,7 +93,7 @@ class ancprev:
 
     def __anc_resid_likelihood(self, dlst, vlst):
         Vlst = [np.diag(v) for v in vlst]
-        return integrate.quad(self.__anc_integrand, self.quad_lower, self.quad_upper, args=(dlst, Vlst))[0]
+        return np.log(integrate.quad(self.__anc_integrand, self.quad_lower, self.quad_upper, args=(dlst, Vlst))[0])
 
 if __name__ == "__main__":
     model_prev = np.array([0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00111, 0.00123, 0.00136, 0.00150, 0.00166,

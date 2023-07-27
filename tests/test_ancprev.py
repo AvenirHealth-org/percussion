@@ -14,7 +14,7 @@ class Test_TestANCPrev(unittest.TestCase):
         anc = ancprev.ancprev()
         anc.read_csv("tests/bwa-urban-anc.csv")
         lnlhood = anc.likelihood(model_prev)
-        self.assertEqual(lnlhood, 6.224725671139364e+20)
+        self.assertEqual(lnlhood, 47.88023123236735) # ln(6.224725671139364e+20)
 
 if __name__ == "__main__":
     unittest.main()
