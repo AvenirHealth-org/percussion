@@ -1,0 +1,119 @@
+"Region","Site","Type","Year","Prevalence","N","UseDataInFit"
+"All","Census","RT",2013,0.0434024161632993,76816,TRUE
+"All","Census","RT",2014,0.0417026700077767,92584,TRUE
+"All","Census","RT",2015,0.0363026800222135,97238,TRUE
+"All","Census","RT",2016,0.0345020593515683,94690,TRUE
+"All","Census","RT",2017,0.0352999689151383,80425,TRUE
+"All","Census","RT",2018,0.0355024223049797,121372,TRUE
+"All","Census","RT",2019,0.0336009664997106,119193,TRUE
+"All","Census","RT",2020,0.0315017860466765,112819,TRUE
+"All","Census","RT",2021,0.0316994173072155,129056,TRUE
+"All","Census","RT",2022,0.0259620696004419,5431,TRUE
+"Coast","Mombasa","SS",1990,0.101,334,TRUE
+"Coast","Mombasa","SS",1991,0.166,60,TRUE
+"Coast","Mombasa","SS",1992,0.11,199,TRUE
+"Coast","Mombasa","SS",1993,0.165,400,TRUE
+"Coast","Mombasa","SS",1994,0.11,254,TRUE
+"Coast","Tiwi ","SS",1995,0.24,300,TRUE
+"Coast","Bamba ","SS",1996,0.018,300,TRUE
+"Coast","Mombasa","SS",1997,0.174,300,TRUE
+"Coast","Tiwi ","SS",1998,0.333,12,TRUE
+"Coast","Mombasa","SS",1998,0.1631,233,TRUE
+"Coast","Tiwi ","SS",1999,0.2281,398,TRUE
+"Coast","Tiwi ","SS",2000,0.144,298,TRUE
+"Coast","Mombasa","SS",2000,0.1222,90,TRUE
+"Coast","Bamba ","SS",2001,0.094,300,TRUE
+"Coast","Tiwi ","SS",2001,0.0996,231,TRUE
+"Coast","Kilifi ","SS",2001,0.098,300,TRUE
+"Coast","Mombasa","SS",2001,0.1429,343,TRUE
+"Coast","Wesu-Wundanyi ","SS",2001,0.074,300,TRUE
+"Coast","Bamba ","SS",2002,0.0556,198,TRUE
+"Coast","Tiwi ","SS",2002,0.0629,286,TRUE
+"Coast","Kilifi ","SS",2002,0.0546,293,TRUE
+"Coast","Mombasa","SS",2002,0.1397,272,TRUE
+"Coast","Wesu-Wundanyi ","SS",2002,0.0579,300,TRUE
+"Coast","Bamba ","SS",2003,0.01,300,TRUE
+"Coast","Tiwi ","SS",2003,0.1,300,TRUE
+"Coast","Kilifi ","SS",2003,0.08,300,TRUE
+"Coast","Mombasa","SS",2003,0.16,300,TRUE
+"Coast","Wesu-Wundanyi ","SS",2003,0.03,300,TRUE
+"Coast","Bamba ","SS",2004,0.016,190,TRUE
+"Coast","Tiwi ","SS",2004,0.071,170,TRUE
+"Coast","Kilifi ","SS",2004,0.04,321,TRUE
+"Coast","Mombasa","SS",2004,0.103,320,TRUE
+"Coast","Wesu-Wundanyi ","SS",2004,0.0283,300,TRUE
+"Coast","Bamba ","SS",2005,0.02,296,TRUE
+"Coast","Tiwi ","SS",2005,0.071,295,TRUE
+"Coast","Kilifi ","SS",2005,0.047,298,TRUE
+"Coast","Mombasa","SS",2005,0.112,393,TRUE
+"Coast","Wesu-Wundanyi ","SS",2005,0.022,300,TRUE
+"Coast","Bamba ","SS",2006,0.032,284,TRUE
+"Coast","Tiwi ","SS",2006,0.084,296,TRUE
+"Coast","Kilifi ","SS",2006,0.027,296,TRUE
+"Coast","Mombasa","SS",2006,0.058,398,TRUE
+"Coast","Wesu-Wundanyi ","SS",2006,0.064,300,TRUE
+"Coast","Bamba ","SS",2009,0.018,282,TRUE
+"Coast","Tiwi ","SS",2009,0.079,274,TRUE
+"Coast","Kilifi ","SS",2009,0.046,385,TRUE
+"Coast","Mombasa","SS",2009,0.082,396,TRUE
+"Coast","Wesu-Wundanyi ","SS",2009,0.054,320,TRUE
+"Coast","Bamba ","SS",2010,0.016,315,TRUE
+"Coast","Tiwi ","SS",2010,0.048,207,TRUE
+"Coast","Kilifi ","SS",2010,0.034,415,TRUE
+"Coast","Mombasa","SS",2010,0.06,403,TRUE
+"Coast","Wesu-Wundanyi ","SS",2010,0.0778,180,TRUE
+"Coast","Bamba ","SS",2011,0.015,273,TRUE
+"Coast","Tiwi ","SS",2011,0.085,188,TRUE
+"Coast","Kilifi ","SS",2011,0.039,410,TRUE
+"Coast","Mombasa","SS",2011,0.111,416,TRUE
+"Coast","Wesu-Wundanyi ","SS",2011,0.032,134,TRUE
+"Coast","Bamba ","RT",2013,0.0233,987,TRUE
+"Coast","Tiwi ","RT",2013,0.0728,467,TRUE
+"Coast","Kilifi ","RT",2013,0.0509,1946,TRUE
+"Coast","Mombasa","RT",2013,0.0357,1064,TRUE
+"Coast","Wesu-Wundanyi ","RT",2013,0.0256,273,TRUE
+"Coast","Bamba ","RT",2014,0.0328,1432,TRUE
+"Coast","Tiwi ","RT",2014,0.0521,537,TRUE
+"Coast","Kilifi ","RT",2014,0.0619,1374,TRUE
+"Coast","Mombasa","RT",2014,0.0685,1678,TRUE
+"Coast","Wesu-Wundanyi ","RT",2014,0.0518,463,TRUE
+"Coast","Bamba ","RT",2015,0.0131,763,TRUE
+"Coast","Tiwi ","RT",2015,0.0568,616,TRUE
+"Coast","Kilifi ","RT",2015,0.0552,2227,TRUE
+"Coast","Mombasa","RT",2015,0.0637,1162,TRUE
+"Coast","Wesu-Wundanyi ","RT",2015,0.0353,368,TRUE
+"Coast","Bamba ","RT",2016,0.0181,996,TRUE
+"Coast","Tiwi ","RT",2016,0.0475,379,TRUE
+"Coast","Kilifi ","RT",2016,0.044,2091,TRUE
+"Coast","Mombasa","RT",2016,0.0847,673,TRUE
+"Coast","Wesu-Wundanyi ","RT",2016,0.0311,289,TRUE
+"Coast","Bamba ","RT",2017,0.0049,1213,TRUE
+"Coast","Tiwi ","RT",2017,0.0357,196,TRUE
+"Coast","Kilifi ","RT",2017,0.0503,1750,TRUE
+"Coast","Mombasa","RT",2017,0.0864,729,TRUE
+"Coast","Wesu-Wundanyi ","RT",2017,0.0602,349,TRUE
+"Coast","Bamba ","RT",2018,0.0111,1717,TRUE
+"Coast","Tiwi ","RT",2018,0.0442,634,TRUE
+"Coast","Kilifi ","RT",2018,0.0317,4068,TRUE
+"Coast","Mombasa","RT",2018,0.0534,1934,TRUE
+"Coast","Wesu-Wundanyi ","RT",2018,0.0342,380,TRUE
+"Coast","Bamba ","RT",2019,0.0114,1661,TRUE
+"Coast","Tiwi ","RT",2019,0.0516,446,TRUE
+"Coast","Kilifi ","RT",2019,0.0431,2810,TRUE
+"Coast","Mombasa","RT",2019,0.0396,1389,TRUE
+"Coast","Wesu-Wundanyi ","RT",2019,0.0201,497,TRUE
+"Coast","Bamba ","RT",2020,0.0124,1213,TRUE
+"Coast","Tiwi ","RT",2020,0.0477,461,TRUE
+"Coast","Kilifi ","RT",2020,0.0353,2408,TRUE
+"Coast","Mombasa","RT",2020,0.0743,754,TRUE
+"Coast","Wesu-Wundanyi ","RT",2020,0.0127,157,TRUE
+"Coast","Bamba ","RT",2021,0.0175,802,TRUE
+"Coast","Tiwi ","RT",2021,0.0322,372,TRUE
+"Coast","Kilifi ","RT",2021,0.0265,2380,TRUE
+"Coast","Mombasa","RT",2021,0.0417,912,TRUE
+"Coast","Wesu-Wundanyi ","RT",2021,0.0275,364,TRUE
+"Coast","Bamba ","RT",2022,0.0091,987,TRUE
+"Coast","Tiwi ","RT",2022,0.0329,517,TRUE
+"Coast","Kilifi ","RT",2022,0.0198,2525,TRUE
+"Coast","Mombasa","RT",2022,0.0534,1030,TRUE
+"Coast","Wesu-Wundanyi ","RT",2022,0.033,212,TRUE
