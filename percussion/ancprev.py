@@ -153,12 +153,6 @@ class ancprev:
         return np.log(integrate.quad(self.__site_integrand, self.quad_lower, self.quad_upper, args=(dlst, Vlst))[0])
 
 if __name__ == "__main__":
-    # model_prev = np.array([0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00111, 0.00123, 0.00136, 0.00150, 0.00166,
-    #                        0.00183, 0.00200, 0.00239, 0.00309, 0.00432, 0.00641, 0.00988, 0.01552, 0.02432, 0.03736,
-    #                        0.05551, 0.07899, 0.10703, 0.13798, 0.16956, 0.19942, 0.22556, 0.24661, 0.26194, 0.27150,
-    #                        0.27566, 0.27503, 0.27045, 0.26344, 0.25587, 0.24928, 0.24303, 0.23681, 0.23020, 0.22382,
-    #                        0.21841, 0.21386, 0.21015, 0.20715])
-    
     coast_prev = np.array([0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00006, 0.00016, 0.00030, 0.00055,
                            0.00099, 0.00175, 0.00302, 0.00510, 0.00843, 0.01354, 0.02089, 0.03084, 0.04351, 0.05842,
                            0.07439, 0.08936, 0.10141, 0.11015, 0.11538, 0.11711, 0.11577, 0.11198, 0.10660, 0.10036,
@@ -168,10 +162,5 @@ if __name__ == "__main__":
                            0.01496])
 
     anc = ancprev(1970)
-    # anc.read_csv("tests/bwa-urban-anc.csv")
-    # anc.read_csv("tests/ken-coast-ancss.csv") # expect -19.470508610987594
-    # anc.read_csv("tests/ken-coast-anc-site.csv") # expect -24.213141355812205
     anc.read_csv("tests/ken-coast-anc.csv")
     print(anc.likelihood(coast_prev))
-    print(anc.likelihood_site(coast_prev))
-    print(anc.likelihood_census(coast_prev))
