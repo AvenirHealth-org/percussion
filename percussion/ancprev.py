@@ -3,7 +3,6 @@ import pandas as pd
 import scipy.integrate as integrate
 import scipy.stats as stats
 
-## TODO: add methods to get and set ANC-SS and ANC-RT bias and variance inflation parameters
 ## TODO: more indicative variable names than "W", "V", etc.
 ## TODO: handle error case where model prevalence does not span all years of data
 
@@ -38,11 +37,32 @@ class ancprev:
         self.quad_lower = 1e-15
         self.quad_upper = 0.3
 
-        # Likelihood model parameters
-        self.__ancss_bias = 0.2637549
-        self.__ancrt_bias = 0.0         # ANC-RT site calibration parameter (see Sheng 2017 AIDS, doi:10.1097/QAD.0000000000001428)
-        self.__var_inflate_site   = 0.0 # ANC site variance inflation (see Eaton 2017 AIDS, doi:10.1097/QAD.0000000000001419)
-        self.__var_inflate_census = 0.0
+        # Initialize likelihood model parameters with default values
+        self.bias_ancss = 0.2637549
+        self.bias_ancrt = 0.0
+        self.var_inflate_site   = 0.0
+        self.var_inflate_census = 0.0
+
+    def set_parameters(self, bias_ancss, bias_ancrt, var_inflate_site, var_inflate_census):
+        """"Helper function to initialize ANC likelihood model parameters
+
+        bias_ancss         -- average difference between site-level ANC prevalence and prevalence in pregnant women
+        bias_ancrt         -- average difference between site-level ANC prevalence from sentinel surveillance vs. routine testing
+        var_inflate_site   -- inflates variance in site-level prevalence estimates for non-sampling error
+        var_inflate_census -- inflates variance in census-level prevalence estimates for non-sampling error
+
+        Note: For an ancprev instance A, parameters can also be set directly via
+        A.<param_name> (e.g., A.bias_ancrt = 0.0).
+
+        bias_ancss and bias_ancrt parameters should be expressed as differences
+        in probit(prevalence). For background on ANC model parameters, see Sheng
+        2017 AIDS (doi:10.1097/QAD.0000000000001428) and Eaton 2017 AIDS
+        (doi:10.1097/QAD.0000000000001419).
+        """
+        self.bias_ancss = bias_ancss
+        self.bias_ancrt = bias_ancrt
+        self.var_inflate_site   = var_inflate_site
+        self.var_inflate_census = var_inflate_census
 
     def read_csv(self, csv_name):
         """ Read ANC prevalence data from a CSV file
@@ -111,9 +131,9 @@ class ancprev:
         """ Calculate the log-likelihood of site-level ANC sentinel surveillance and routine testing HIV prevalence data
         proj_prev -- array of annual HIV prevalence esimates. proj_prev[0] must be the prevalence at ancprev.base_year
         """
-        probit_prev = stats.norm.ppf(proj_prev) + self.__ancss_bias # TODO: consider having separate series for SS and RT = probit(prev) shifted by appropriate bias/calibration terms
-        dlst = [w - probit_prev[i] - r * self.__ancrt_bias for (w, i, r) in zip(self.site_W, self.site_yidx, self.site_type)]
-        vlst = [v + self.__var_inflate_site for v in self.site_v]
+        probit_prev = stats.norm.ppf(proj_prev) + self.bias_ancss # TODO: consider having separate series for SS and RT = probit(prev) shifted by appropriate bias/calibration terms
+        dlst = [w - probit_prev[i] - r * self.bias_ancrt for (w, i, r) in zip(self.site_W, self.site_yidx, self.site_type)]
+        vlst = [v + self.var_inflate_site for v in self.site_v]
         return self.__site_resid_likelihood(dlst, vlst)
     
     def likelihood_census(self, proj_prev):
@@ -121,7 +141,7 @@ class ancprev:
         proj_prev -- array of annual HIV prevalence esimates. proj_prev[0] must be the prevalence at ancprev.base_year
         """
         probit_prev = stats.norm.ppf(proj_prev)
-        return stats.norm.logpdf(self.census_W, probit_prev[self.census_yidx], np.sqrt(self.census_v + self.__var_inflate_census)).sum()
+        return stats.norm.logpdf(self.census_W, probit_prev[self.census_yidx], np.sqrt(self.census_v + self.var_inflate_census)).sum()
 
     def __prepare_data_site(self):
         """ Reformat site-level ANC data for likelihood calculation """
