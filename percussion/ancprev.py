@@ -3,17 +3,13 @@ import pandas as pd
 import scipy.integrate as integrate
 import scipy.stats as stats
 
-## TODO: write_csv
 ## TODO: add methods to get and set ANC-SS and ANC-RT bias and variance inflation parameters
-## TODO: accept ANC-RT site-level data
-## TODO: accept ANC-RT census-level data
 ## TODO: more indicative variable names than "W", "V", etc.
-## TODO: use Region column to distinguish sites with the same name in different regions
 ## TODO: handle error case where model prevalence does not span all years of data
-## TODO: split read_csv body into private functions for a) site and b) census data
 
 ## TODO: error handling for malformatted csv files
 ## - Type must be either RT or SS
+## - Use (region, site) composite identifiers to allow same-name sites in different regions
 
 class ancprev:
     def __init__(self, proj_first_year):
@@ -82,7 +78,7 @@ class ancprev:
         anc_data_used = self.anc_data[self.anc_data['UseDataInFit']] # drop unused observations
         anc_site_data = anc_data_used[anc_data_used['Site'] != 'Census']
 
-        anc_site_data['Type'] = (anc_site_data['Type'] == "RT").astype(int) # 1 if routine testing, 0 otherwise (presumed sentinel surveillance)
+        anc_site_data.loc[:,'Type'] = anc_site_data['Type'].map(dict(SS=0, RT=1))
 
         # split anc_data_used into a list with one dataframe per site. sort=False preserves the site ordering
         # in the input CSV. Note that reordering sites in the input file can change the calculated likelihood
@@ -105,21 +101,26 @@ class ancprev:
 
         self.census_W, self.census_v = self.__prepare_data_census() # TODO: could pass census_prev and census_size, then discard after read_csv?
 
-    def write_csv(self):
-        pass
+    def likelihood(self, proj_prev):
+        """ Calculate the log-likelihood of ANC prevalence data given projected pregnant women HIV prevalence estimates
+        proj_prev -- array of annual HIV prevalence esimates. proj_prev[0] must be the prevalence at ancprev.base_year
+        """
+        return self.likelihood_site(proj_prev) + self.likelihood_census(proj_prev)
 
-    def likelihood(self, prevalence):
-        return self.likelihood_site(prevalence) + self.likelihood_census(prevalence)
-
-    def likelihood_site(self, prevalence):
-        """ Calculate the ANC log-likelihood given a time series of pregnant women HIV prevalence estimates """
-        probit_prev = stats.norm.ppf(prevalence) + self.__ancss_bias # TODO: consider having separate series for SS and RT = probit(prev) shifted by appropriate bias/calibration terms
+    def likelihood_site(self, proj_prev):
+        """ Calculate the log-likelihood of site-level ANC sentinel surveillance and routine testing HIV prevalence data
+        proj_prev -- array of annual HIV prevalence esimates. proj_prev[0] must be the prevalence at ancprev.base_year
+        """
+        probit_prev = stats.norm.ppf(proj_prev) + self.__ancss_bias # TODO: consider having separate series for SS and RT = probit(prev) shifted by appropriate bias/calibration terms
         dlst = [w - probit_prev[i] - r * self.__ancrt_bias for (w, i, r) in zip(self.site_W, self.site_yidx, self.site_type)]
         vlst = [v + self.__var_inflate_site for v in self.site_v]
         return self.__site_resid_likelihood(dlst, vlst)
     
-    def likelihood_census(self, prevalence):
-        probit_prev = stats.norm.ppf(prevalence)
+    def likelihood_census(self, proj_prev):
+        """ Calculate the log-likelihood of census-level ANC routine testing HIV prevalence data
+        proj_prev -- array of annual HIV prevalence esimates. proj_prev[0] must be the prevalence at ancprev.base_year
+        """
+        probit_prev = stats.norm.ppf(proj_prev)
         return stats.norm.logpdf(self.census_W, probit_prev[self.census_yidx], np.sqrt(self.census_v + self.__var_inflate_census)).sum()
 
     def __prepare_data_site(self):
