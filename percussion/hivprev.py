@@ -12,6 +12,7 @@ import scipy.stats as stats
 
 ## TODO: If speed is an issue, create a direct index map from hivprev::hiv_data_used
 ## to hivprev::template during hivprev::__prepare_data.
+## TODO: Develop some unit tests
 
 class hivprev:
     def __init__(self, proj_first_year):
@@ -64,4 +65,4 @@ if __name__ == "__main__":
     hiv.read_csv("tests/mwi-hiv-prev-data.csv")
     template = hiv.projection_template()
     template['Prevalence'] = 0.1
-    print(hiv.likelihood(template))
+    print(hiv.likelihood(template)) # expect -3063.4929590598936
