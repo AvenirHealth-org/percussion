@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "percussion"
+version = "0.0.1"
+authors = [
+  { name="Robert Glaubius", email="rglaubius@avenirhealth.org" },
+]
+description = "Likelihood models for HIV epidemiological data"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/rlglaubius/percussion"
+"Bug Tracker" = "https://github.com/rlglaubius/percussion/issues"
