@@ -161,16 +161,21 @@ class ancprev:
 
     def __posterior_prevalence(self, num_hivpos, num_ascertained):
         return (num_hivpos + self.beta_mean) / (num_ascertained + self.beta_size)
+    
+    def __dmvnorm(self, d, v, s2):
+        inv_sigma = np.diag(1.0 / v) - s2 * np.outer(1.0 / v, 1.0 / v) / (1.0 + s2 * sum(1.0 / v))
+        cov = stats.Covariance.from_precision(inv_sigma)
+        return stats.multivariate_normal.logpdf(d, cov=cov)
 
-    def __site_integrand(self, s2, dlst, Vlst):
-        term1 = sum([stats.multivariate_normal.logpdf(d, cov = v + s2) for (d, v) in zip(dlst, Vlst)])
+    def __site_integrand(self, s2, dlst, vlst):
+        term1 = sum([self.__dmvnorm(d, v, s2) for (d, v) in zip(dlst, vlst)])
         term2 = np.log(s2) * (-self.invgamma_shape - 1.0)
         term3 = -1.0 / (s2 * self.invgamma_rate)
         return np.exp(term1 + term2 + term3)
 
     def __site_resid_likelihood(self, dlst, vlst):
-        Vlst = [np.diag(v) for v in vlst]
-        return np.log(integrate.quad(self.__site_integrand, self.quad_lower, self.quad_upper, args=(dlst, Vlst))[0])
+        return np.log(integrate.quad(self.__site_integrand, self.quad_lower, self.quad_upper, args=(dlst, vlst))[0])
+
 
 if __name__ == "__main__":
     coast_prev = np.array([0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00006, 0.00016, 0.00030, 0.00055,

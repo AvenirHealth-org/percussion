@@ -24,22 +24,25 @@ class Test_TestANCPrev(unittest.TestCase):
             0.01496])
 
     def test_ancprev_lnlhood_ancss(self):
+        target = np.log(6.224725671139364e+20) # value from anclik package demo dataset
         anc = ancprev.ancprev(1970)
         anc.read_csv("tests/bwa-urban-anc.csv")
         lnlhood = anc.likelihood(self.bwa_urban_prev)
-        self.assertEqual(lnlhood, 47.88023123236735) # ln(6.224725671139364e+20)
+        self.assertTrue(np.isclose(lnlhood, target, rtol=1e-10, atol=1e-10))
 
     def test_ancprev_lnlhood_site(self):
+        target = -24.213141355812205
         anc = ancprev.ancprev(1970)
         anc.read_csv("tests/ken-coast-anc.csv")
         lnlhood = anc.likelihood_site(self.ken_coast_prev)
-        self.assertEqual(lnlhood, -24.213141355812205)
+        self.assertTrue(np.isclose(lnlhood, target, rtol=1e-10, atol=1e-10))
 
     def test_ancprev_lnlhood_census(self):
+        target = -26.37767756638095
         anc = ancprev.ancprev(1970)
         anc.read_csv("tests/ken-coast-anc.csv")
         lnlhood = anc.likelihood_census(self.ken_coast_prev)
-        self.assertEqual(lnlhood, -26.37767756638095)
+        self.assertTrue(np.isclose(lnlhood, target, rtol=1e-10, atol=1e-10))
 
 if __name__ == "__main__":
     unittest.main()
