@@ -133,7 +133,7 @@ class ancprev:
         """
         probit_prev = stats.norm.ppf(proj_prev) + self.bias_ancss # TODO: consider having separate series for SS and RT = probit(prev) shifted by appropriate bias/calibration terms
         dlst = [w - probit_prev[i] - r * self.bias_ancrt for (w, i, r) in zip(self.site_W, self.site_yidx, self.site_type)]
-        vlst = [v + self.var_inflate_site for v in self.site_v]
+        vlst = [1.0 / (v + self.var_inflate_site) for v in self.site_v]
         return self.__site_resid_likelihood(dlst, vlst)
     
     def likelihood_census(self, proj_prev):
@@ -163,7 +163,7 @@ class ancprev:
         return (num_hivpos + self.beta_mean) / (num_ascertained + self.beta_size)
     
     def __dmvnorm(self, d, v, s2):
-        inv_sigma = np.diag(1.0 / v) - s2 * np.outer(1.0 / v, 1.0 / v) / (1.0 + s2 * sum(1.0 / v))
+        inv_sigma = np.diag(v) - (s2 / (1.0 + s2 * sum(v))) * np.outer(v, v)
         cov = stats.Covariance.from_precision(inv_sigma)
         return stats.multivariate_normal.logpdf(d, cov=cov)
 
@@ -185,7 +185,6 @@ if __name__ == "__main__":
                            0.04741, 0.04573, 0.04423, 0.04253, 0.04105, 0.03985, 0.03811, 0.03614, 0.03434, 0.03232,
                            0.03021, 0.02871, 0.02751, 0.02587, 0.02393, 0.02205, 0.02033, 0.01876, 0.01736, 0.01610,
                            0.01496])
-
     anc = ancprev(1970)
     anc.read_csv("tests/ken-coast-anc.csv")
     print(anc.likelihood(coast_prev))
