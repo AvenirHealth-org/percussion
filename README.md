@@ -6,7 +6,7 @@ HIV epidemic models are calibrated to various kinds of data, including HIV preva
 
 This package currently implements likelihood models for HIV prevalence data only, but we intend to extend this to include the various data used to calibrate models in the UNAIDS-supported [Spectrum software suite](https://avenirhealth.org/software-spectrum.php).
 
-The 'percussion' package is aspirational - a longstanding goal of the [UNAIDS Reference Group on Estimates, Modelling, and Projections](https://epidem.org/) has been to consolidate the [models and tools](https://hivtools.unaids.org/) used to make HIV estimates into one "symphony" model.
+The 'percussion' package name is aspirational - a longstanding vision of the [UNAIDS Reference Group on Estimates, Modelling, and Projections](https://epidem.org/) has been to consolidate the [models and tools](https://hivtools.unaids.org/) used to make HIV estimates into one "symphony" model.
 
 # Modules
 ## ancprev
@@ -33,7 +33,7 @@ $$P\sim \mathrm{Beta}(\theta N, (1-\theta)N)$$
 
 # How to use the percussion package
 
-You can install the `percussion` package from github using `pip`
+You can install the `percussion` package from github using `pip`:
 
 ```
 python pip -m install git+https://${user}:${token}@github.com/rlglaubius/percussion.git
@@ -41,7 +41,7 @@ python pip -m install git+https://${user}:${token}@github.com/rlglaubius/percuss
 
 Here, `${user}` is your github username and `${token}` is your github-generated [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic).
 
-## general
+## General notes
 All likelihood values returned by percussion modules are on the (natural) log scale rather than the natural scale.
 
 ## ancprev
