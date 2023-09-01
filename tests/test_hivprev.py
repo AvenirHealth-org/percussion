@@ -16,7 +16,7 @@ class Test_TestHIVPrev(unittest.TestCase):
         hiv.read_csv("tests/mwi-hiv-prev-data.csv")
         proj_prev = pd.read_csv("tests/mwi-hiv-prev-projected.csv")
         lnlhood = hiv.likelihood(proj_prev)
-        self.assertEqual(lnlhood, -112.72247309230656)
+        self.assertEqual(lnlhood, -114.73486025521241)
 
 if __name__ == "__main__":
     unittest.main()

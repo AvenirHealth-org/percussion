@@ -80,7 +80,7 @@ class hivprev:
         ## to align model-based estimates with data. One way to optimize would be to create an index mapping
         ## from proj_prev to hiv_data_used during __prepare_data.
         df = self.hiv_data_used.merge(proj_prev, how='left', on=self.cols_template)
-        return sum(stats.beta.logpdf(df['Value'], df['NumTested'] * df['Prevalence'], df['NumTested'] * (1.0 - df['Prevalence'])))
+        return sum(stats.beta.logpdf(df['Value'], df['NumTested'] * df['Prevalence'] + 1.0, df['NumTested'] * (1.0 - df['Prevalence']) + 1.0))
 
     def projection_template(self):
         """ Request a template for prevalence data
@@ -116,4 +116,4 @@ if __name__ == "__main__":
     hiv.read_csv("tests/mwi-hiv-prev-data.csv")
     template = hiv.projection_template()
     template['Prevalence'] = 0.1
-    print(hiv.likelihood(template)) # expect -3063.4929590598936
+    print(hiv.likelihood(template))
