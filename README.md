@@ -29,7 +29,7 @@ Spectrum models represent the likelihood of HIV prevalence data from household s
 
 The hivprev model assumes instead that the observed prevalence follows a Beta distribution given the (weighted) number of people tested for HIV. Specifically, given observed prevalence $P$ measured among $N$ respondents, the likelihood of the observed data given modeled HIV prevalence $\theta$ is derived as
 
-$$P\sim \mathrm{Beta}(\theta N, (1-\theta)N)$$
+$$P\sim \mathrm{Beta}(\theta N+1, (1-\theta)N+1)$$
 
 # How to use the percussion package
 
