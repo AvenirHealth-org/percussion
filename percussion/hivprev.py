@@ -95,12 +95,6 @@ class hivprev:
         be empty on return from hivprev.projection_template. The user is responsible
         for filling in the Prevalence column for each row. Once completed, it can be passed
         to hivprev.likelihood(...) for likelihood evaluation.
-
-        Population, Gender, AgeMin, AgeMax, and Year specify who HIV prevalence was
-        measured in and when. Population can be any population included in the HIV
-        prevalence data entered via hivprev.read_csv(). Gender is either 'Female',
-        'Male', or 'All'. AgeMin and AgeMax are integers specifying the age
-        range (inclusive).
         """
         return self.template.copy()
 

@@ -31,6 +31,15 @@ The hivprev model assumes instead that the observed prevalence follows a Beta di
 
 $$P\sim \mathrm{Beta}(\theta N+1, (1-\theta)N+1)$$
 
+## all_cause_deaths
+Likelihood model for all-cause deaths in the general population
+
+The [Thembisa](https://thembisa.org/) model version 4.6 is calibrated to reported numbers of deaths by year, sex, and age. The all_cause_deaths module implements the likelihood, which assumes reported deaths $R$ are normally distributed (on log scale) with mean equal to estimated deaths $N$, adjusted for reporting completeness $\gamma$:
+
+$$\ln R\sim \mathrm{Normal}(\ln (\gamma N), \sigma^2)$$
+
+Module users should provide an estimate of the variance in modeled deaths $\sigma^2$ and should adjust modeled deaths for reporting completeness, as the `all_cause_deaths` module will not estimate these automatically. The [Thembisa manual](https://thembisa.org/content/downloadPage/Thembisa4_6report) describes how this is done when preparing HIV estimates in South Africa. Reported deaths data can be entered by year and sex for arbitrary age ranges. Observations are assumed conditionally independent across these strata conditional on the model estimate.
+
 # How to use the percussion package
 
 You can install the `percussion` package from github using `pip`:
@@ -105,3 +114,31 @@ print(hiv.likelihood(template))
 ```
 
 We initialize the `hivprev` instance named `hiv` with the first year of our HIV epidemic model projection (1970) for consistency with other likelihood modules. After initializing `hiv` using `read_csv()`, we can request a projection template via `hiv.projection_template()`. This template is a pandas data frame with columns for `Population`, `Gender`, `AgeMin`, `AgeMax`, and `Year`, with one row for each unique combination of these column values in the input CSV file. The `Prevalence` column in the template is initialized to `NaN`. You must fill in these prevalence values with prevalence (as a proportion) before evaluating the likelihood. In the example above, we set all these values to 10% (0.1) for the sake of illustration.
+
+## all_cause_deaths
+To use the `all_cause_deaths` module, you first need to prepare a CSV file with data on reported all-cause deaths. See `deaths-data-synthetic.csv` in the `tests` folder of this repository for an example. This is a plain-text CSV file with one datapoint per row and the following columns:
+
+- `Year`: The year that deaths when reported deaths occurred.
+- `Gender`: This is free-form. The example file has data for females and males. Your model must be capable of estimating deaths in each sex or gender in your CSV file.
+- `AgeMin`: The youngest age of individuals contributing to the datapoint.
+- `AgeMax`: The oldest age of individuals contributing to the datapoint.
+- `Value`: The reported number of deaths. This may be a fraction, for example, if some deaths were imputed.
+- `UseDataInFit`: Datapoints are included in likelihood evaluation if this is `TRUE` and are excluded if this is `FALSE`.
+
+The ordering of rows and columns does not matter. You may include additional columns with (e.g.) documentation for datapoints. These must not use any of the column names listed above. Any additional columns you include will be ignored when you initialize your `all_cause_deaths` instance.
+
+As with the `hivprev` module above, the `all_cause_deaths` module treats all datapoints as independent observations, which is not appropriate for handling overlapping observations. For example, if you have deaths counts for age 15-24, 25-49, and 15-49 for the same year and gender, then either the aggregate 15-49 count or the constituent 15-24 and 25-49 counts should be excluded by setting `UseDataInFit=FALSE`, otherwise the likelihood will give too much weight to deaths in these overlapping groups, which could bias model estimates calibrated to all-cause deaths data.
+
+The `all_cause_deaths` module is flexible in terms of the sex or gender and age groups it can be used with. As with the `hivprev` module above, the `all_cause_deaths` module automatically creates a template based on reported deaths data you specify. You just fill in this template with your modeled estimates of deaths, then share the completed template with the module to evaluate the likelihood:
+
+```
+from percussion import all_cause_deaths
+
+deaths = all_cause_deaths.all_cause_deaths(1970)
+deaths.read_csv("tests/deaths-data-synthetic.csv")
+template = deaths.projection_template()
+template['Deaths'] = 3200
+print(deaths.likelihood(template))
+```
+
+In this snippet, we initialize an `all_cause_deaths` instance named `deaths` with the first year of our HIV epidemic model projection (1970). After initializing `deaths` using `read_csv()`, we request a projection template via `deaths.projection_template()`. This template is a pandas data frame with columns for `Year`, `Gender`, `AgeMin`, and `AgeMax`, with one row for each unique combination of these column values in the input CSV file. The `Deaths` column in the template is initialized to `NaN`. You must fill in these values with deaths estimates from your model. In the example above, we set all these values to 3,200 for the sake of illustration.
